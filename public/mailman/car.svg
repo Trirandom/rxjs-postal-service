@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 84 56" width="84" height="56">
+  <!-- delivery van: violet cargo box, darker cab, envelope decal -->
+  <ellipse cx="42" cy="52" rx="38" ry="3" fill="#2e1065" opacity="0.15"/>
+  <rect x="3" y="6" width="52" height="36" rx="5" fill="#8b5cf6"/>
+  <rect x="6" y="9" width="4" height="28" rx="2" fill="#fff" opacity="0.25"/>
+  <path d="M53 16 H67 Q70 16 72 18 L80 27 Q81 28.5 81 30 V38 Q81 42 77 42 H53 Z" fill="#5b21b6"/>
+  <path d="M58 20 H66 L73 28 H58 Z" fill="#c4b5fd"/>
+  <rect x="76" y="32" width="5" height="4" rx="1.5" fill="#fde68a"/>
+  <rect x="17" y="14" width="24" height="17" rx="3" fill="#fff"/>
+  <path d="M18.5 15.5 L29 23 L39.5 15.5" fill="none" stroke="#f43f5e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="18" cy="43" r="7.5" fill="#1e1b2e"/>
+  <circle cx="18" cy="43" r="3" fill="#ddd6fe"/>
+  <circle cx="66" cy="43" r="7.5" fill="#1e1b2e"/>
+  <circle cx="66" cy="43" r="3" fill="#ddd6fe"/>
+</svg>

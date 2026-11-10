@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 200" width="160" height="200">
+  <!-- Sorting conveyor (animated): mail drops from the hopper, rides the belt under the scanner, leaves sorted -->
+  <defs>
+    <linearGradient id="hopper" x1="0" x2="1">
+      <stop offset="0" stop-color="#8b5cf6"/>
+      <stop offset="0.55" stop-color="#7c3aed"/>
+      <stop offset="1" stop-color="#5b21b6"/>
+    </linearGradient>
+    <linearGradient id="arch" x1="0" x2="1">
+      <stop offset="0" stop-color="#7c3aed"/>
+      <stop offset="1" stop-color="#4c1d95"/>
+    </linearGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f43f5e" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#f43f5e" stop-opacity="0.08"/>
+    </linearGradient>
+
+    <!-- mail items drawn at the origin, 24 x 15, bottom edge at y=15 -->
+    <g id="letter">
+      <rect width="24" height="15" rx="2.5" fill="#fff"/>
+      <path d="M1 1 L12 9 L23 1" fill="none" stroke="#f43f5e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g id="parcel" transform="translate(-1.6 -10.5) scale(0.44)">
+      <polygon points="32,6 58,18 32,30 6,18" fill="#f3d3a4"/>
+      <polygon points="6,18 32,30 32,58 6,46" fill="#e2b276"/>
+      <polygon points="32,30 58,18 58,46 32,58" fill="#c98f4f"/>
+      <polygon points="17,12.9 43,24.9 50,21.7 24,9.7" fill="#f43f5e"/>
+      <polygon points="43,24.9 50,21.7 50,49.7 43,52.9" fill="#e11d48"/>
+    </g>
+    <g id="tick">
+      <circle cx="23" cy="0" r="5" fill="#7c3aed"/>
+      <path d="M20.6 0 L22.4 1.8 L25.6 -1.6" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </defs>
+
+  <style>
+    /* One item cycle = 3s; three items offset by 1s. Belt speed ≈ 46.6 units/s. */
+    .item { animation: ride 3s infinite; }
+    .item--b { animation-delay: -1s; }
+    .item--c { animation-delay: -2s; }
+    .item .tick { animation: sorted 3s infinite; animation-delay: inherit; }
+
+    @keyframes ride {
+      0%   { transform: translate(21px, 40px);  opacity: 1; animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45); }
+      20%  { transform: translate(21px, 104px); animation-timing-function: linear; }
+      88%  { transform: translate(116px, 104px); opacity: 1; animation-timing-function: ease-out; }
+      100% { transform: translate(130px, 104px); opacity: 0; }
+    }
+    @keyframes sorted {
+      0%, 57%   { opacity: 0; transform: scale(0.4); }
+      62%, 100% { opacity: 1; transform: scale(1); }
+    }
+    .tick { transform-box: fill-box; transform-origin: center; }
+
+    .belt-top { animation: belt 0.3s linear infinite; }
+    @keyframes belt { to { stroke-dashoffset: -14; } }
+
+    .roller { transform-box: fill-box; transform-origin: center; animation: spin 1.08s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .chevrons { animation: chevrons 0.6s linear infinite; }
+    @keyframes chevrons { to { transform: translateX(14px); } }
+
+    /* scanner pulses each time an item passes under it */
+    .beam, .lamp { animation: scan 1s ease-in-out infinite; animation-delay: 0.17s; }
+    @keyframes scan {
+      0%, 100% { opacity: 0.35; }
+      50%      { opacity: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .item, .item .tick, .belt-top, .roller, .chevrons, .beam, .lamp { animation: none; }
+      .item--a { transform: translate(21px, 104px); }
+      .item--b { transform: translate(69px, 104px); }
+      .item--c { transform: translate(116px, 104px); }
+      .item--a .tick, .item--b .tick { opacity: 0; }
+    }
+  </style>
+
+  <ellipse cx="80" cy="191" rx="66" ry="6" fill="#2e1065" opacity="0.18"/>
+
+  <!-- frame legs & brace -->
+  <rect x="30" y="136" width="10" height="48" rx="3" fill="#4c1d95"/>
+  <rect x="120" y="136" width="10" height="48" rx="3" fill="#3b0764"/>
+  <path d="M38 176 L122 146" stroke="#5b21b6" stroke-width="4" stroke-linecap="round"/>
+  <rect x="24" y="180" width="22" height="8" rx="3" fill="#3b0764"/>
+  <rect x="114" y="180" width="22" height="8" rx="3" fill="#3b0764"/>
+
+  <!-- belt body -->
+  <rect x="10" y="118" width="140" height="22" rx="11" fill="#3b0764"/>
+  <rect x="10" y="118" width="140" height="6" rx="3" fill="#6d28d9"/>
+  <path class="belt-top" d="M20 121 H140" stroke="#a78bfa" stroke-width="1.6" stroke-dasharray="6 8" stroke-linecap="round"/>
+  <rect x="22" y="128" width="116" height="10" rx="3" fill="#5b21b6"/>
+  <!-- direction chevrons on the side panel, scrolling inside a clip -->
+  <clipPath id="panel"><rect x="44" y="128" width="72" height="10"/></clipPath>
+  <g clip-path="url(#panel)">
+    <path class="chevrons" d="M24 130 L28 133 L24 136 M38 130 L42 133 L38 136 M52 130 L56 133 L52 136 M66 130 L70 133 L66 136 M80 130 L84 133 L80 136 M94 130 L98 133 L94 136 M108 130 L112 133 L108 136"
+          fill="none" stroke="#c4b5fd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <!-- end rollers -->
+  <g class="roller">
+    <circle cx="21" cy="129" r="8" fill="#c4b5fd"/>
+    <path d="M21 122.5 V135.5 M14.5 129 H27.5" stroke="#8b5cf6" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="21" cy="129" r="3" fill="#4c1d95"/>
+  </g>
+  <g class="roller">
+    <circle cx="139" cy="129" r="8" fill="#a78bfa"/>
+    <path d="M139 122.5 V135.5 M132.5 129 H145.5" stroke="#7c3aed" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="139" cy="129" r="3" fill="#4c1d95"/>
+  </g>
+
+  <!-- scanner posts (behind the mail) -->
+  <rect x="97" y="62" width="7" height="58" rx="3" fill="#5b21b6"/>
+
+  <!-- moving mail: drawn before the hopper so it emerges from the chute -->
+  <g class="item item--a"><use href="#letter"/><use class="tick" href="#tick"/></g>
+  <g class="item item--b"><use href="#parcel"/><use class="tick" href="#tick"/></g>
+  <g class="item item--c"><use href="#letter"/><use class="tick" href="#tick"/></g>
+
+  <!-- intake hopper (left) -->
+  <path d="M10 22 H56 L46 54 H20 Z" fill="url(#hopper)"/>
+  <path d="M16 28 L24 50" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity="0.25"/>
+  <rect x="6" y="18" width="54" height="9" rx="4.5" fill="#4c1d95"/>
+  <rect x="19" y="52" width="28" height="9" rx="3" fill="#3b0764"/>
+
+  <!-- scanner arch over the middle (front post, beam, head) -->
+  <rect x="60" y="62" width="7" height="58" rx="3" fill="#7c3aed"/>
+  <polygon class="beam" points="70,72 94,72 102,118 62,118" fill="url(#beam)"/>
+  <rect x="55" y="52" width="54" height="16" rx="6" fill="url(#arch)"/>
+  <rect x="60" y="56" width="22" height="3" rx="1.5" fill="#fff" opacity="0.25"/>
+  <rect x="72" y="66" width="20" height="5" rx="2.5" fill="#1e1b2e"/>
+  <circle class="lamp" cx="82" cy="47" r="5" fill="#f43f5e"/>
+</svg>

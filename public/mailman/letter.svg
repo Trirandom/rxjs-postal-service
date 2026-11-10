@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 44" width="64" height="44">
+  <!-- letter: white envelope, violet flap, rose seal -->
+  <rect x="2" y="3" width="60" height="39" rx="6" fill="#ddd6fe"/>
+  <rect x="2" y="2" width="60" height="38" rx="6" fill="#fff"/>
+  <path d="M4 38 L26 20 M60 38 L38 20" stroke="#c4b5fd" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M5 5 Q32 30 32 30 Q32 30 59 5 Q57 2 54 2 H10 Q7 2 5 5 Z" fill="#8b5cf6"/>
+  <path d="M5 5 Q32 30 32 30 L32 24 L9 3 Q7 3 5 5 Z" fill="#a78bfa"/>
+  <circle id="seal" cx="32" cy="27" r="6" fill="#f43f5e"/>
+  <path d="M29.5 26 L32 28.5 L34.5 26" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
