@@ -1,0 +1,578 @@
+<header class="app-bar glass">
+    <div class="brand">
+        <span class="brand__logo" aria-hidden="true">
+            <img src="mailman/letter.svg" alt="" />
+        </span>
+        <div class="min-w-0">
+            <h1 class="brand__title">RxJS <span class="brand__accent">Postal Service</span></h1>
+            <p class="brand__tagline">Observables, delivered.</p>
+        </div>
+    </div>
+    <div class="controls">
+        <label class="speed">
+            <span class="speed__label">Transit speed · {{ speed() }}×</span>
+            <mat-slider
+                min="0"
+                [max]="speedSteps.length - 1"
+                step="1"
+                discrete
+                showTickMarks
+                [displayWith]="formatSpeed"
+            >
+                <input
+                    matSliderThumb
+                    [value]="speedIndex()"
+                    (valueChange)="setSpeedIndex($event)"
+                    aria-label="Transit speed"
+                />
+            </mat-slider>
+        </label>
+        <button mat-stroked-button (click)="togglePause()" [attr.aria-pressed]="paused()">
+            <mat-icon fontSet="material-symbols-outlined">{{
+                paused() ? 'play_arrow' : 'pause'
+            }}</mat-icon>
+            {{ paused() ? 'Resume' : 'Pause' }}
+        </button>
+        <button mat-flat-button (click)="restart()">
+            <mat-icon fontSet="material-symbols-outlined">restart_alt</mat-icon>
+            Restart
+        </button>
+    </div>
+</header>
+
+<main class="flex flex-col gap-6 px-6 pt-6 pb-10">
+    <section class="intro">
+        <h2 class="intro__title">Follow the mail through your pipeline</h2>
+        <p class="intro__text">
+            Mail is posted in the mailbox, goes through the sorting centers, and is delivered to
+            every subscribed house.
+        </p>
+    </section>
+    <section
+        #journey
+        class="journey"
+        [class.journey--paused]="paused()"
+        [style.grid-template-columns]="journeyColumns()"
+        aria-label="Mail journey"
+    >
+        <!-- Sources: the mailbox on the road line, and below it the courier dispatch of flattening operators -->
+        <div class="sources">
+            <article class="stage stage--source glass">
+                <div class="stage__top">
+                    <header class="stage__header">
+                        <span class="stage__kind">Mailbox</span>
+                        <span class="badge" [attr.data-status]="stage('mailbox')?.status ?? 'open'"
+                            >{{ stage('mailbox')?.count ?? 0 }} posted</span
+                        >
+                    </header>
+                    <img class="stage__img" src="mailman/mailbox.svg" alt="Mailbox" />
+                    <mat-form-field subscriptSizing="dynamic">
+                        <mat-label>Creation operator</mat-label>
+                        <mat-select
+                            [value]="creation()"
+                            (selectionChange)="creation.set($event.value)"
+                        >
+                            @for (option of creationOptions; track option.name) {
+                                <mat-option [value]="option.name">{{
+                                    option.label ?? option.name
+                                }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                    <code class="stage__code">{{ creationCode() }}</code>
+                </div>
+                <ng-container
+                    *ngTemplateOutlet="
+                        dock;
+                        context: { $implicit: stage('mailbox'), inRoad: null, outRoad: 0 }
+                    "
+                />
+                <div class="stage__bottom">
+                    @if (manual()) {
+                        <div class="press">
+                            <button
+                                mat-flat-button
+                                class="press__send"
+                                [class.press--active]="pressed() === 'send'"
+                                (click)="press('send')"
+                                matTooltip="post.next(mail)"
+                            >
+                                <mat-icon fontSet="material-symbols-outlined">send</mat-icon>
+                                Send <kbd>S</kbd>
+                            </button>
+                            <button
+                                mat-stroked-button
+                                class="press__error"
+                                [class.press--active]="pressed() === 'error'"
+                                (click)="press('error')"
+                                matTooltip="post.error('lost mail')"
+                            >
+                                <mat-icon fontSet="material-symbols-outlined">error</mat-icon>
+                                Error <kbd>E</kbd>
+                            </button>
+                            <button
+                                mat-stroked-button
+                                class="press__complete"
+                                [class.press--active]="pressed() === 'complete'"
+                                (click)="press('complete')"
+                                matTooltip="post.complete()"
+                            >
+                                <mat-icon fontSet="material-symbols-outlined"
+                                    >check_circle</mat-icon
+                                >
+                                Complete <kbd>C</kbd>
+                            </button>
+                        </div>
+                    }
+                    <mat-slide-toggle [checked]="hot()" (change)="hot.set($event.checked)">
+                        {{
+                            hot()
+                                ? 'Hot: shared, late houses miss past mail'
+                                : 'Cold: each house gets its own run'
+                        }}
+                    </mat-slide-toggle>
+                </div>
+            </article>
+
+            @if (flatteningCenters().length) {
+                <!-- the inner observable: flattening operators create one courier per letter from here -->
+                <article class="courier-box glass" aria-label="Courier dispatch">
+                    <header class="stage__header">
+                        <span class="stage__kind">Couriers</span>
+                        <mat-icon
+                            fontSet="material-symbols-outlined"
+                            class="depot__help"
+                            matTooltip="The inner observable: for each letter, the flattening operator subscribes to courier(mail), which delivers it in parts (#1a #1b…)"
+                            >help</mat-icon
+                        >
+                    </header>
+                    <div class="flex items-center gap-3">
+                        <img
+                            class="courier-box__img"
+                            src="mailman/courier-dispatch.svg"
+                            alt="Courier dispatch"
+                        />
+                        <mat-form-field subscriptSizing="dynamic" class="min-w-0 flex-1">
+                            <mat-label>Courier creation</mat-label>
+                            <mat-select
+                                [value]="courierCreation()"
+                                (selectionChange)="courierCreation.set($event.value)"
+                            >
+                                @for (option of courierOptions; track option.name) {
+                                    <mat-option [value]="option.name">{{ option.name }}</mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <code class="stage__code"
+                        >courier = (mail) =&gt; {{ courierOption().code }}</code
+                    >
+                    @for (entry of flatteningCenters(); track entry.center.id) {
+                        @if (depot(entry.center.id); as depot) {
+                            <section
+                                class="depot"
+                                [attr.data-depot]="entry.center.id"
+                                [attr.aria-label]="
+                                    'Couriers of sorting center #' + (entry.index + 1)
+                                "
+                            >
+                                <header class="depot__header">
+                                    <span class="depot__title"
+                                        >for #{{ entry.index + 1 }}
+                                        {{ entry.center.operator }}</span
+                                    >
+                                    @if (depot.hidden()) {
+                                        <span class="depot__more"
+                                            >+{{ depot.hidden() }} earlier</span
+                                        >
+                                    }
+                                </header>
+                                <ul class="depot__runs">
+                                    @for (run of depot.shown(); track run.id) {
+                                        <li
+                                            class="run"
+                                            [attr.data-state]="run.state"
+                                            [matTooltip]="runTitle(run)"
+                                        >
+                                            <img
+                                                class="run__box"
+                                                src="mailman/mailbox.svg"
+                                                alt=""
+                                            />
+                                            <span class="run__letter">{{ run.letter.label }}</span>
+                                            <span class="run__parts" aria-hidden="true">
+                                                @for (slot of partSlots(); track slot.index) {
+                                                    <span
+                                                        class="run__part"
+                                                        [class.run__part--sent]="
+                                                            slot.index < run.parts
+                                                        "
+                                                        >{{ slot.label }}</span
+                                                    >
+                                                }
+                                            </span>
+                                            <span class="run__state">{{
+                                                courierStates[run.state]
+                                            }}</span>
+                                        </li>
+                                    } @empty {
+                                        <li class="depot__empty">no courier yet</li>
+                                    }
+                                </ul>
+                            </section>
+                        }
+                    }
+                </article>
+            }
+        </div>
+
+        <ng-container *ngTemplateOutlet="road; context: { $implicit: 0 }" />
+
+        <!-- Middle: zero, one or many sorting centers -->
+        @for (center of centers(); track center.id; let i = $index) {
+            <article class="stage glass" [attr.data-center]="center.id">
+                <div class="stage__top">
+                    <header class="stage__header">
+                        <div class="flex min-w-0 items-center gap-2">
+                            <span class="stage__kind">#{{ i + 1 }}</span>
+                            <span
+                                class="category"
+                                [attr.data-category]="operatorCategory(center.operator)"
+                                >{{ operatorCategory(center.operator) }}</span
+                            >
+                        </div>
+                        <button
+                            mat-icon-button
+                            class="stage__remove"
+                            (click)="removeCenter(center.id)"
+                            matTooltip="Close this sorting center"
+                        >
+                            <mat-icon fontSet="material-symbols-outlined">close</mat-icon>
+                        </button>
+                    </header>
+                    <img
+                        class="stage__img stage__img--sorter"
+                        src="mailman/sorting-belt.svg"
+                        alt="Sorting conveyor"
+                    />
+                    <mat-form-field subscriptSizing="dynamic">
+                        <mat-label>Operator</mat-label>
+                        <mat-select
+                            [value]="center.operator"
+                            (selectionChange)="assignOperator(center.id, $event.value)"
+                        >
+                            @for (group of operatorGroups; track group.category) {
+                                <mat-optgroup [label]="group.category">
+                                    @for (op of group.operators; track op.name) {
+                                        <mat-option [value]="op.name">{{ op.name }}</mat-option>
+                                    }
+                                </mat-optgroup>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                    <code class="stage__code">{{ operatorCode(center.operator) }}</code>
+                </div>
+                <ng-container
+                    *ngTemplateOutlet="
+                        dock;
+                        context: {
+                            $implicit: stage(center.id),
+                            inRoad: i,
+                            outRoad: i + 1,
+                            showLast: false,
+                        }
+                    "
+                />
+                <div class="stage__bottom">
+                    <div class="counters">
+                        <span
+                            class="badge"
+                            [attr.data-status]="stageInput(center.id)?.status ?? 'open'"
+                            matTooltip="Mail received by this center"
+                        >
+                            {{ stageInput(center.id)?.count ?? 0 }} in
+                        </span>
+                        <mat-icon
+                            fontSet="material-symbols-outlined"
+                            class="counters__arrow"
+                            aria-hidden="true"
+                            >arrow_forward</mat-icon
+                        >
+                        <span
+                            class="badge"
+                            [attr.data-status]="stage(center.id)?.status ?? 'open'"
+                            matTooltip="Mail sent on by this center"
+                        >
+                            {{ stage(center.id)?.count ?? 0 }} out
+                        </span>
+                    </div>
+                    <dl class="latest">
+                        <div class="latest__row">
+                            <dt class="latest__label">Last received</dt>
+                            <dd class="latest__value">
+                                <ng-container
+                                    *ngTemplateOutlet="
+                                        latestMail;
+                                        context: { $implicit: stageInput(center.id) }
+                                    "
+                                />
+                            </dd>
+                        </div>
+                        <div class="latest__row">
+                            <dt class="latest__label">Last sent</dt>
+                            <dd class="latest__value">
+                                <ng-container
+                                    *ngTemplateOutlet="
+                                        latestMail;
+                                        context: { $implicit: stage(center.id) }
+                                    "
+                                />
+                            </dd>
+                        </div>
+                    </dl>
+                    @if (flatteningHint(center.operator); as hint) {
+                        <!-- flattening operators get their couriers (inner observables) from the courier dispatch -->
+                        <p class="center__hint">
+                            <img class="center__hint-icon" src="mailman/mailbox.svg" alt="" />
+                            {{ hint }}
+                        </p>
+                    }
+                </div>
+            </article>
+
+            <ng-container *ngTemplateOutlet="road; context: { $implicit: i + 1 }" />
+        }
+
+        <!-- Destination: houses are the subscribers -->
+        <div class="houses">
+            @for (house of houses(); track house.id) {
+                <article
+                    class="house glass"
+                    [attr.data-house]="house.id"
+                    [class.house--off]="!house.subscribed()"
+                >
+                    <img class="house__img" [src]="house.img" [alt]="house.name" />
+                    <div class="flex min-w-0 flex-1 flex-col gap-1">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="house__name">{{ house.name }}</span>
+                            <div class="flex items-center gap-1">
+                                <mat-slide-toggle
+                                    [checked]="house.subscribed()"
+                                    (change)="house.subscribed.set($event.checked)"
+                                    [attr.aria-label]="'Subscribe ' + house.name"
+                                />
+                                @if (houses().length > 1) {
+                                    <button
+                                        mat-icon-button
+                                        class="stage__remove"
+                                        (click)="removeHouse(house)"
+                                        [matTooltip]="'Demolish ' + house.name"
+                                    >
+                                        <mat-icon fontSet="material-symbols-outlined"
+                                            >close</mat-icon
+                                        >
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                        <div class="counters">
+                            <span class="badge" [attr.data-status]="house.status()">
+                                @switch (house.status()) {
+                                    @case ('off') {
+                                        unsubscribed
+                                    }
+                                    @case ('waiting') {
+                                        subscribed
+                                    }
+                                    @case ('complete') {
+                                        complete
+                                    }
+                                    @case ('error') {
+                                        error: {{ house.error() }}
+                                    }
+                                }
+                            </span>
+                            <span class="badge" matTooltip="Mail received by this house"
+                                >{{ house.count() }} received</span
+                            >
+                        </div>
+                        <ul class="mail-list">
+                            @for (mail of house.received(); track mail.seq; let first = $first) {
+                                <li class="contents">
+                                    <ng-container
+                                        *ngTemplateOutlet="
+                                            mailChip;
+                                            context: { $implicit: mail, isNew: first }
+                                        "
+                                    />
+                                </li>
+                            } @empty {
+                                <li class="mail-list__empty">no mail yet</li>
+                            }
+                        </ul>
+                    </div>
+                </article>
+            }
+            <button mat-stroked-button class="self-center" (click)="addHouse()">
+                <mat-icon fontSet="material-symbols-outlined">add_home</mat-icon>
+                Build a house
+            </button>
+        </div>
+
+        <!-- courier lanes: from the courier dispatch (inner observable) into each flattening center -->
+        @if (flatteningCenters().length && courierRoutes().length) {
+            <div class="couriers" aria-hidden="true">
+                <svg class="couriers__routes">
+                    @for (route of courierRoutes(); track route.id) {
+                        <path class="courier-route" [attr.d]="route.d" />
+                        <circle
+                            class="courier-route__joint"
+                            [attr.cx]="route.start.x"
+                            [attr.cy]="route.start.y"
+                            r="4"
+                        />
+                        <circle
+                            class="courier-route__joint"
+                            [attr.cx]="route.end.x"
+                            [attr.cy]="route.end.y"
+                            r="5"
+                        />
+                    }
+                </svg>
+                @for (route of courierRoutes(); track route.id) {
+                    @for (parcel of depot(route.id)?.parcels() ?? []; track parcel.id) {
+                        <span
+                            class="parcel"
+                            [style.--route]="'path(&quot;' + route.d + '&quot;)'"
+                            [style.--transit]="parcel.duration + 'ms'"
+                        >
+                            <ng-container
+                                *ngTemplateOutlet="mailChip; context: { $implicit: parcel.item }"
+                            />
+                        </span>
+                    }
+                }
+            </div>
+        }
+    </section>
+
+    <section class="code-panel glass" aria-label="Equivalent code">
+        <h2 class="code-panel__title">Equivalent code</h2>
+        <pre><code>{{ pipelineCode() }}</code></pre>
+    </section>
+</main>
+
+<!-- the road between two stages: mail travels on it, and a "+" opens a sorting center -->
+<ng-template #road let-index>
+    @let last = index === centers().length;
+    <div class="road" [class.road--last]="last">
+        <!-- one stream line per house (subscription), or a single one where the stream is shared -->
+        @for (lane of lanesOn(index); track lane.key) {
+            <span
+                class="lane"
+                [class.lane--off]="lane.off"
+                [class.lane--shared]="lane.shared"
+                [style.--lane]="lane.offset + 'px'"
+            ></span>
+        }
+        @if (last) {
+            <!-- just before the houses, each lane turns towards its own house -->
+            <svg class="split" aria-hidden="true">
+                @for (lane of lanesOn(index); track lane.key) {
+                    <path
+                        class="split__lane"
+                        [class.lane--off]="lane.off"
+                        [attr.d]="splitPath(lane)"
+                    />
+                }
+            </svg>
+        }
+        @for (traveller of travellersOn(index); track traveller.id) {
+            @let split = last ? splitOf(traveller) : null;
+            <span
+                class="traveller"
+                [class.traveller--split]="split"
+                [style.--transit]="traveller.duration + 'ms'"
+                [style.--lane]="laneOffset(traveller.lane) + 'px'"
+                [style.--dy]="split ? split.dy + 'px' : null"
+                [style.--split-at]="split?.at"
+                [style.--split-len]="split?.len"
+                aria-hidden="true"
+            >
+                <span class="traveller__turn">
+                    <ng-container
+                        *ngTemplateOutlet="mailChip; context: { $implicit: traveller.item }"
+                    />
+                </span>
+            </span>
+        }
+        <button
+            mat-mini-fab
+            class="road__add"
+            (click)="addCenter(index)"
+            matTooltip="Open a sorting center here"
+        >
+            <mat-icon fontSet="material-symbols-outlined">add</mat-icon>
+        </button>
+    </div>
+</ng-template>
+
+<!-- the dock sits in the middle of a stage, on the road: it shows the last mail sent on
+     (unless showLast is false: sorting centers list it under their counters instead) -->
+<ng-template #dock let-activity let-inRoad="inRoad" let-outRoad="outRoad" let-showLast="showLast">
+    <div class="dock" [style.min-height.px]="dockHeight()">
+        <!-- lanes go through the stage: each subscription has its own operator instance -->
+        @for (lane of lanesOn(inRoad); track lane.key) {
+            <span
+                class="lane lane--in"
+                [class.lane--off]="lane.off"
+                [class.lane--shared]="lane.shared"
+                [style.--lane]="lane.offset + 'px'"
+            ></span>
+        }
+        @for (lane of lanesOn(outRoad); track lane.key) {
+            <span
+                class="lane lane--out"
+                [class.lane--off]="lane.off"
+                [class.lane--shared]="lane.shared"
+                [style.--lane]="lane.offset + 'px'"
+            ></span>
+        }
+        @if (showLast !== false) {
+            @if (activity?.last) {
+                @for (pulse of [activity.count]; track pulse) {
+                    <span class="dock__landing">
+                        <ng-container
+                            *ngTemplateOutlet="mailChip; context: { $implicit: activity.last }"
+                        />
+                    </span>
+                }
+            } @else {
+                <span class="dock__empty">waiting for mail…</span>
+            }
+        }
+    </div>
+</ng-template>
+
+<!-- the latest mail that went through a stage, popping again each time a new one arrives -->
+<ng-template #latestMail let-activity>
+    @if (activity?.last) {
+        @for (pulse of [activity.count]; track pulse) {
+            <span class="latest__mail">
+                <ng-container *ngTemplateOutlet="mailChip; context: { $implicit: activity.last }" />
+            </span>
+        }
+    } @else {
+        <span class="latest__empty">none yet</span>
+    }
+</ng-template>
+
+<!-- letter: a single mail, package: a bundle of letters, car: a bundle of bundles -->
+<ng-template #mailChip let-item let-isNew="isNew">
+    <span class="mail" [class.mail--new]="isNew" [attr.data-shape]="item.shape">
+        @if (item.shape !== 'other') {
+            <img class="mail__icon" [src]="'mailman/' + item.shape + '.svg'" [alt]="item.shape" />
+        }
+        {{ item.label }}
+    </span>
+</ng-template>

@@ -1,0 +1,127 @@
+/* the road between two stages, with a "+" to open a sorting center */
+.road {
+    position: relative;
+    /* the road line row: lanes at 50% line up with the docks */
+    grid-row: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/*
+ * A lane is the stream line of one subscription (house), drawn --lane px off the center
+ * line. Where the stream is shared (hot mailbox, share()), a single thicker lane is drawn.
+ */
+.lane {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(50% + var(--lane, 0px));
+    border-top: 3px dashed var(--lane-color);
+    translate: 0 -50%;
+    transition:
+        top 300ms ease,
+        opacity 200ms;
+}
+
+.lane--shared {
+    border-top-width: 4px;
+}
+
+.lane--off {
+    opacity: 0.25;
+}
+
+/* the last road: lanes stop where they turn towards their house */
+.road--last .lane {
+    right: 64px;
+}
+
+.split {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 64px;
+    height: 1px;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.split__lane {
+    fill: none;
+    stroke: var(--lane-color);
+    stroke-width: 3;
+    stroke-dasharray: 8 6;
+    transition: opacity 200ms;
+}
+
+.road__add {
+    position: relative;
+    opacity: 0.55;
+    transition: opacity 150ms;
+}
+
+.road:hover .road__add,
+.road__add:focus-visible {
+    opacity: 1;
+}
+
+/*
+ * A mail on its way: it leaves the dock at the center of the previous stage, follows its
+ * lane at a steady pace, and lands in the dock of the next stage (or inside its house).
+ */
+.traveller {
+    --from: calc(var(--stage-width) / 2);
+    --to: calc(var(--stage-width) / 2);
+    position: absolute;
+    top: calc(50% + var(--lane, 0px));
+    z-index: 2;
+    pointer-events: none;
+    white-space: nowrap;
+    translate: -50% -50%;
+    animation: transit var(--transit, 900ms) linear forwards;
+}
+
+.road--last .traveller {
+    --to: 24px;
+}
+
+/* on the last road, the mail turns towards its house while crossing the split */
+.traveller--split .traveller__turn {
+    display: block;
+    animation: turn calc(var(--transit) * var(--split-len)) ease-in-out
+        calc(var(--transit) * var(--split-at)) both;
+}
+
+@keyframes turn {
+    to {
+        translate: 0 var(--dy);
+    }
+}
+
+/* travellers are compact so that mail on neighbouring lanes stays readable */
+.traveller .mail {
+    padding: 0 0.375rem;
+    gap: 0.25rem;
+    font: var(--mat-sys-label-small);
+    box-shadow: 0 3px 8px -3px rgb(0 0 0 / 0.45);
+}
+
+.traveller .mail__icon {
+    height: 0.875rem;
+}
+
+@keyframes transit {
+    from {
+        left: calc(-1 * var(--from));
+        scale: 1.1;
+    }
+    85% {
+        opacity: 1;
+    }
+    to {
+        left: calc(100% + var(--to));
+        scale: 1;
+        opacity: 0;
+    }
+}

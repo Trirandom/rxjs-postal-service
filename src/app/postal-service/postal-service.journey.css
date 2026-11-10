@@ -1,0 +1,96 @@
+/* --- journey: mailbox -> centers -> houses ------------------------------- */
+.journey {
+    --stage-width: 15rem;
+    --lane-color: color-mix(in srgb, var(--mat-sys-primary) 55%, transparent);
+    /* offsets of the houses are measured from here */
+    --road-width: 5rem;
+    --houses-width: 22rem;
+    position: relative;
+    /*
+     * Rows shared by every card (through subgrid): card tops, the road line (docks),
+     * card bottoms, and a last row taking whatever only the courier box / houses need.
+     * Columns come from journeyColumns() in the component.
+     */
+    display: grid;
+    grid-template-rows: auto auto auto 1fr;
+    gap: 0;
+    overflow-x: auto;
+    padding: 0.5rem 0.25rem 1rem;
+}
+
+/*
+ * A stage spans the top / dock / bottom rows of the journey: its dock sits on the shared
+ * road line, and each card is only as tall as the tallest content of its neighbours.
+ */
+.stage {
+    grid-row: 1 / 4;
+    display: grid;
+    grid-template-rows: subgrid;
+    row-gap: 0.75rem;
+    padding: 1rem;
+    border-radius: var(--mat-sys-corner-extra-large);
+}
+
+.stage__top,
+.stage__bottom {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0.75rem;
+}
+
+.stage--source {
+    background: linear-gradient(
+        160deg,
+        color-mix(in srgb, var(--mat-sys-primary-container) 70%, transparent),
+        color-mix(in srgb, var(--mat-sys-tertiary-container) 45%, transparent)
+    );
+}
+
+.stage,
+.house {
+    transition:
+        transform 200ms ease,
+        box-shadow 200ms ease,
+        opacity 200ms,
+        filter 200ms;
+}
+
+/* stages don't lift on hover: their dock must stay on the road line */
+.house:hover {
+    transform: translateY(-2px);
+}
+
+.stage__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+}
+
+.stage__kind {
+    font: var(--mat-sys-title-medium);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.stage__img {
+    height: 6.5rem;
+    object-fit: contain;
+}
+
+.stage__img--sorter {
+    height: 6.5rem;
+}
+
+.stage__code {
+    font-family: var(--app-font-mono);
+    font-size: 0.75rem;
+    padding: 0.5rem 0.625rem;
+    border-radius: var(--mat-sys-corner-medium);
+    background: light-dark(rgb(255 255 255 / 0.6), rgb(0 0 0 / 0.25));
+    border: 1px solid var(--app-glass-border);
+    color: var(--mat-sys-on-surface);
+    word-break: break-word;
+}

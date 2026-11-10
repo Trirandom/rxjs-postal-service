@@ -1,0 +1,162 @@
+/* --- dock: where mail stops in a stage, on the road line ------------------ */
+.dock {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2rem;
+    /* reach the card edges so the dashed line joins the roads on both sides */
+    margin-inline: -1rem;
+}
+
+/* lanes come in on the left half of the dock and leave from the right half */
+.dock .lane--in {
+    right: 50%;
+}
+
+.dock .lane--out {
+    left: 50%;
+}
+
+.dock__landing {
+    position: relative;
+    animation: land 350ms ease-out;
+}
+
+.dock__empty {
+    position: relative;
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--mat-sys-corner-full);
+    background: var(--mat-sys-surface-container);
+    font: var(--mat-sys-body-small);
+    font-style: italic;
+    color: var(--mat-sys-on-surface-variant);
+}
+
+@keyframes land {
+    from {
+        scale: 1.25;
+    }
+    to {
+        scale: 1;
+    }
+}
+
+/*
+ * The trip itself is what this view teaches, so travellers keep moving even with reduced
+ * motion (a steady glide); only the decorative landing pop is dropped.
+ */
+@media (prefers-reduced-motion: reduce) {
+    .dock__landing {
+        animation: none;
+    }
+}
+
+/* --- houses (subscribers) ---------------------------------------------- */
+.houses {
+    grid-row: 1 / -1;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.house {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: var(--mat-sys-corner-extra-large);
+}
+
+.house--off {
+    opacity: 0.55;
+    filter: grayscale(1);
+}
+
+.house__img {
+    width: 6rem;
+    flex-shrink: 0;
+    object-fit: contain;
+}
+
+.house__name {
+    font: var(--mat-sys-title-small);
+}
+
+/* --- mail ---------------------------------------------------------------- */
+.mail-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.mail-list__empty {
+    font: var(--mat-sys-body-small);
+    color: var(--mat-sys-on-surface-variant);
+    font-style: italic;
+}
+
+.mail {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--mat-sys-corner-full);
+    background: var(--mat-sys-tertiary-container);
+    color: var(--mat-sys-on-tertiary-container);
+    font: var(--mat-sys-label-medium);
+}
+
+.mail[data-shape] {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.mail__icon {
+    height: 1.125rem;
+    width: auto;
+}
+
+.mail[data-shape='car'] .mail__icon {
+    height: 1.5rem;
+}
+
+.mail--new {
+    animation: deliver 450ms ease-out;
+}
+
+@keyframes deliver {
+    from {
+        transform: translateX(-1.5rem) scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: none;
+        opacity: 1;
+    }
+}
+
+.badge {
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--mat-sys-corner-full);
+    font: var(--mat-sys-label-small);
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+}
+
+.badge[data-status='complete'] {
+    background: var(--mat-sys-primary);
+    color: var(--mat-sys-on-primary);
+}
+
+.badge[data-status='error'] {
+    background: var(--mat-sys-error);
+    color: var(--mat-sys-on-error);
+}
+
+.badge[data-status='off'] {
+    background: var(--mat-sys-surface-variant);
+    color: var(--mat-sys-on-surface-variant);
+}

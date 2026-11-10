@@ -1,0 +1,180 @@
+/* --- courier depot: the inner subscriptions of a flattening center ------- */
+.depot {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 0.5rem;
+    border-radius: var(--mat-sys-corner-large);
+    background: light-dark(rgb(255 255 255 / 0.45), rgb(0 0 0 / 0.2));
+}
+
+.depot__header {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.depot__title {
+    flex: 1;
+    font: var(--mat-sys-label-medium);
+    font-weight: 700;
+}
+
+.depot__help {
+    width: 1rem;
+    height: 1rem;
+    font-size: 1rem;
+    color: var(--mat-sys-on-surface-variant);
+    cursor: help;
+}
+
+/* fixed height so the card (and the road line) doesn't jump as couriers come and go */
+.depot__runs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-height: calc(4 * 1.625rem + 3 * 0.25rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.depot__empty,
+.depot__more {
+    font: var(--mat-sys-body-small);
+    font-style: italic;
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.depot__more {
+    font: var(--mat-sys-label-small);
+}
+
+.run {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    height: 1.625rem;
+    padding: 0 0.375rem;
+    border-radius: var(--mat-sys-corner-full);
+    background: var(--mat-sys-surface-container);
+    font: var(--mat-sys-label-small);
+    animation: courier-in 300ms ease-out;
+    transition:
+        opacity 300ms,
+        background 200ms;
+}
+
+.run__box {
+    height: 1.125rem;
+}
+
+.run__letter {
+    font-weight: 700;
+    min-width: 1.75rem;
+}
+
+.run__parts {
+    display: flex;
+    gap: 0.125rem;
+}
+
+.run__part {
+    display: grid;
+    place-items: center;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    border: 1px dashed var(--mat-sys-outline);
+    color: var(--mat-sys-outline);
+    font-size: 0.625rem;
+}
+
+.run__part--sent {
+    border-style: solid;
+    border-color: transparent;
+    background: var(--mat-sys-tertiary-container);
+    color: var(--mat-sys-on-tertiary-container);
+    animation: land 300ms ease-out;
+}
+
+.run__state {
+    margin-left: auto;
+    white-space: nowrap;
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.run[data-state='running'] {
+    background: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
+}
+
+.run[data-state='running'] .run__box {
+    animation: courier-busy 600ms ease-in-out infinite alternate;
+}
+
+.run[data-state='queued'] {
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+}
+
+.run[data-state='done'] {
+    opacity: 0.6;
+}
+
+.run[data-state='cancelled'],
+.run[data-state='dropped'],
+.run[data-state='error'] {
+    background: var(--mat-sys-error-container);
+    color: var(--mat-sys-on-error-container);
+    opacity: 0.75;
+}
+
+.run[data-state='cancelled'] .run__letter,
+.run[data-state='dropped'] .run__letter,
+.run[data-state='error'] .run__letter {
+    text-decoration: line-through;
+}
+
+.run[data-state='cancelled'] .run__state,
+.run[data-state='dropped'] .run__state,
+.run[data-state='error'] .run__state {
+    color: inherit;
+}
+
+.journey--paused .run,
+.journey--paused .run__box,
+.journey--paused .run__part {
+    animation-play-state: paused;
+}
+
+@keyframes courier-in {
+    from {
+        opacity: 0;
+        translate: 0 -0.5rem;
+    }
+}
+
+@keyframes courier-busy {
+    to {
+        translate: 0 -2px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .run,
+    .run__part--sent,
+    .run[data-state='running'] .run__box {
+        animation: none;
+    }
+}
+
+/* local copy: keyframes are scoped per stylesheet */
+@keyframes land {
+    from {
+        scale: 1.25;
+    }
+    to {
+        scale: 1;
+    }
+}
