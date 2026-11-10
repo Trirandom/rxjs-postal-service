@@ -1,0 +1,96 @@
+// Angular Material 3 theme + global look: fonts, radial gradient backdrop and glass surfaces.
+// Learn more at https://material.angular.dev/guide/theming
+@use '@angular/material' as mat;
+
+html {
+  height: 100%;
+  // Follows the OS setting: light or dark.
+  color-scheme: light dark;
+
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$violet-palette,
+        tertiary: mat.$rose-palette,
+      ),
+      typography: (
+        brand-family: "'Bricolage Grotesque', 'Plus Jakarta Sans', sans-serif",
+        plain-family: "'Plus Jakarta Sans', system-ui, sans-serif",
+        bold-weight: 700,
+        medium-weight: 600,
+        regular-weight: 400,
+      ),
+      density: 0,
+    )
+  );
+
+  // --- app-level design tokens -------------------------------------------
+  --app-font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', Consolas, monospace;
+  --app-blur: 18px;
+  --app-glass-bg: light-dark(rgb(255 255 255 / 0.55), rgb(28 24 44 / 0.5));
+  --app-glass-bg-strong: light-dark(rgb(255 255 255 / 0.75), rgb(30 26 48 / 0.78));
+  --app-glass-border: light-dark(rgb(255 255 255 / 0.7), rgb(255 255 255 / 0.1));
+  --app-glass-highlight: light-dark(rgb(255 255 255 / 0.9), rgb(255 255 255 / 0.08));
+  --app-glass-shadow: light-dark(
+    0 10px 30px -12px rgb(76 40 140 / 0.25),
+    0 12px 32px -12px rgb(0 0 0 / 0.6)
+  );
+  --app-bg-base: light-dark(#f6f2ff, #0e0b19);
+  --app-orb-1: light-dark(rgb(167 139 250 / 0.55), rgb(124 58 237 / 0.45));
+  --app-orb-2: light-dark(rgb(251 113 133 / 0.4), rgb(225 29 72 / 0.3));
+  --app-orb-3: light-dark(rgb(56 189 248 / 0.4), rgb(14 165 233 / 0.25));
+  --app-orb-4: light-dark(rgb(250 204 21 / 0.25), rgb(168 85 247 / 0.25));
+
+  // --- Material component overrides to blend with the glass look ---------
+  @include mat.form-field-overrides(
+    (
+      filled-container-color: light-dark(rgb(255 255 255 / 0.45), rgb(255 255 255 / 0.06)),
+    )
+  );
+  @include mat.select-overrides(
+    (
+      panel-background-color: var(--app-glass-bg-strong),
+    )
+  );
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  -webkit-font-smoothing: antialiased;
+
+  // Layered radial gradients ("aurora" orbs) on a soft base, fixed while scrolling.
+  background-color: var(--app-bg-base);
+  background-image:
+    radial-gradient(40rem 32rem at 8% 0%, var(--app-orb-1), transparent 65%),
+    radial-gradient(36rem 30rem at 95% 12%, var(--app-orb-2), transparent 65%),
+    radial-gradient(44rem 36rem at 70% 100%, var(--app-orb-3), transparent 65%),
+    radial-gradient(30rem 26rem at 15% 85%, var(--app-orb-4), transparent 65%);
+  background-attachment: fixed;
+}
+
+// Reusable frosted-glass surface.
+.glass {
+  background: var(--app-glass-bg);
+  border: 1px solid var(--app-glass-border);
+  box-shadow:
+    inset 0 1px 0 var(--app-glass-highlight),
+    var(--app-glass-shadow);
+  backdrop-filter: blur(var(--app-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--app-blur)) saturate(160%);
+}
+
+// Overlays (select panels, tooltips) get the same frosted treatment.
+.mat-mdc-select-panel,
+.mat-mdc-autocomplete-panel {
+  backdrop-filter: blur(var(--app-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--app-blur)) saturate(160%);
+  border: 1px solid var(--app-glass-border);
+}
+
+code,
+pre {
+  font-family: var(--app-font-mono);
+}
