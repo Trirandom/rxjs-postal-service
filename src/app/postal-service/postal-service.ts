@@ -36,7 +36,7 @@ import {
 } from './mail-catalog';
 import { MailClock } from './mail-clock';
 import { CourierDepot, CourierRun } from './mail-depot';
-import { inLane, Lane, laneTap, MailTransit, Traveller } from './mail-transit';
+import { End, inLane, Lane, laneTap, MailTransit, Traveller } from './mail-transit';
 
 /** A sorting center sits between the mailbox and the houses and applies one operator. */
 interface SortingCenter {
@@ -256,8 +256,8 @@ export class PostalService {
                     fromRoad === undefined
                         ? transit.posted()
                         : Math.max(transit.arrival(fromRoad, laneOn(fromRoad, captured)), depot?.delivered(laneOn(fromRoad, captured)) ?? -Infinity);
-                const settle = (status: StageActivity['status']) =>
-                    stage && transit.at(Math.max(transit.lastDeparture(road, lane), reached()), () => show(stage, { status }));
+                // The error / complete notification travels too, behind the last mail, and closes the lane.
+                const settle = (status: End) => transit.end(road, lane, status, reached(), stage ? () => show(stage, { status }) : undefined);
                 return {
                     next: (value) => {
                         const item = toItem(value);

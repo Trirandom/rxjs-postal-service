@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 44" width="64" height="44">
+  <!-- torn letter (error): the envelope ripped in two, greyed, with an ink stain -->
+  <g transform="rotate(-7 16 22)">
+    <path d="M2 9 Q2 3 8 3 H31 L28 10 L33 16 L27 23 L32 30 L28 37 L30 41 H8 Q2 41 2 35 Z" fill="#fecdd3"/>
+    <path d="M2 8 Q2 2 8 2 H31 L28 9 L33 15 L27 22 L32 29 L28 36 L30 40 H8 Q2 40 2 34 Z" fill="#fff"/>
+    <path d="M4 37 L24 21" stroke="#e5e7eb" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M5 5 Q18 17 27 24 L31 18 L28 9 L30.5 2 H10 Q7 2 5 5 Z" fill="#9ca3af"/>
+  </g>
+  <g transform="translate(3 1) rotate(9 46 22)">
+    <path d="M33 3 H56 Q62 3 62 9 V35 Q62 41 56 41 H32 L30 37 L34 30 L29 23 L35 16 L30 10 Z" fill="#fecdd3"/>
+    <path d="M33 2 H56 Q62 2 62 8 V34 Q62 40 56 40 H32 L30 36 L34 29 L29 22 L35 15 L30 9 Z" fill="#fff"/>
+    <path d="M60 37 L40 21" stroke="#e5e7eb" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M59 5 Q46 17 35 24 L31 18 L34 12 L32.5 2 H54 Q57 2 59 5 Z" fill="#9ca3af"/>
+  </g>
+  <!-- stain -->
+  <path d="M40 27 Q44 22 49 25 Q54 24 54 29 Q57 33 52 35 Q49 39 45 36 Q39 37 40 32 Q37 29 40 27 Z" fill="#e11d48" opacity="0.75"/>
+  <circle cx="56" cy="24" r="1.6" fill="#e11d48" opacity="0.75"/>
+  <circle cx="38" cy="37" r="1.2" fill="#e11d48" opacity="0.75"/>
+</svg>

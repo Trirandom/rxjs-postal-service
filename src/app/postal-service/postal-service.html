@@ -500,9 +500,22 @@
                 aria-hidden="true"
             >
                 <span class="traveller__turn">
-                    <ng-container
-                        *ngTemplateOutlet="mailChip; context: { $implicit: traveller.item }"
-                    />
+                    @if (traveller.end === 'error') {
+                        <!-- the error: a torn, stained letter, the last thing on this lane -->
+                        <span class="end-marker" data-end="error">
+                            <img class="end-marker__icon" src="mailman/letter-torn.svg" alt="" />
+                            error
+                        </span>
+                    } @else if (traveller.end) {
+                        <span class="end-marker" data-end="complete">
+                            <mat-icon fontSet="material-symbols-outlined">check</mat-icon>
+                            complete
+                        </span>
+                    } @else {
+                        <ng-container
+                            *ngTemplateOutlet="mailChip; context: { $implicit: traveller.item }"
+                        />
+                    }
                 </span>
             </span>
         }
