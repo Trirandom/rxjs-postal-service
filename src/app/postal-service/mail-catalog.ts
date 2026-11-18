@@ -88,12 +88,12 @@ export const CREATION_OPTIONS: CreationOption[] = [
         name: 'manual',
         label: 'of / throwError (buttons)',
         manual: true,
-        code: "new Observable(post => { let n = 0; return press$.subscribe(key => key === 's' ? post.next(++n) : key === 'e' ? post.error('lost mail') : post.complete()); })",
+        code: "new Observable(post => { let n = 0; return press$.subscribe(key => key === 's' ? post.next(++n) : key === 'e' ? post.error('torn letter') : post.complete()); })",
         create: (_, presses) =>
             new Observable<number>((post) => {
                 let n = 0;
                 return presses.subscribe((press) =>
-                    press === 'send' ? post.next(++n) : press === 'error' ? post.error('lost mail') : post.complete(),
+                    press === 'send' ? post.next(++n) : press === 'error' ? post.error('torn letter') : post.complete(),
                 );
             }),
     },
@@ -157,9 +157,9 @@ export const COURIER_OPTIONS: CourierOption[] = [
     },
     {
         name: 'throwError',
-        code: "interval(400).pipe(take(2), map(part => ({ ...mail, part })), concatWith(throwError(() => 'courier lost')))",
+        code: "interval(400).pipe(take(2), map(part => ({ ...mail, part })), concatWith(throwError(() => 'courier tore the letter')))",
         parts: 3,
-        create: (c) => (mail) => interval(400, c).pipe(take(2), inParts(mail), concatWith(throwError(() => 'courier lost'))),
+        create: (c) => (mail) => interval(400, c).pipe(take(2), inParts(mail), concatWith(throwError(() => 'courier tore the letter'))),
     },
 ];
 

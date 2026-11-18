@@ -552,7 +552,7 @@ export class PostalService {
     }
 
     readonly courierStates: Record<CourierRun['state'], string> = {
-        error: 'lost',
+        error: 'torn',
         queued: 'waiting',
         running: 'on the way',
         done: 'delivered',

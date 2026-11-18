@@ -63,12 +63,12 @@ describe('CourierDepot with other couriers', () => {
         expect(delivered).toEqual(['#1a', '#1b', '#1c', '#2a', '#2b', '#2c']);
     });
 
-    it('a failing courier (throwError) is lost and fails the delivery', () => {
+    it('a failing courier (throwError) tears the letter and fails the delivery', () => {
         const { at, delivered, failure } = run('merge', courierNamed('throwError'));
         // #1 fails right after its 2nd part (1.8s): the outer stream fails before #2 is posted
         expect(at(1900)).toEqual(['#1:error:2']);
         expect(at(2100)).toEqual(['#1:error:2']);
         expect(delivered).toEqual(['#1a', '#1b']);
-        expect(failure()).toBe('courier lost');
+        expect(failure()).toBe('courier tore the letter');
     });
 });

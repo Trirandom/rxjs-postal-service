@@ -13,7 +13,7 @@ An interactive playground for learning RxJS. You build an observable pipeline as
 | Sorting center       | Pipeable operator (`map`, `filter`, `take`, …)               |
 | Courier dispatch     | Inner observable of a flattening operator (`mergeMap`, …)    |
 | House                | Subscriber                                                   |
-| Lost mail / closed   | `error` / `complete`                                         |
+| Torn letter / closed | `error` / `complete`                                         |
 
 ## Features
 
