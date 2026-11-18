@@ -22,7 +22,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { connectable, defer, map, Observable, OperatorFunction, Subject, Subscription, tap } from 'rxjs';
+import { connectable, defer, finalize, map, Observable, OperatorFunction, Subject, Subscription, tap } from 'rxjs';
 import {
     COURIER_OPTIONS,
     CREATION_OPTIONS,
@@ -280,8 +280,21 @@ export class PostalService {
             error: () => transit.at(transit.posted(), () => show(MAILBOX, { status: 'error' })),
         });
 
+        // Mailbox runs currently live, and how the latest one ended: once every run has ended,
+        // the mailbox can no longer post (an observable sends nothing after error or complete).
+        const runs = signal(0);
+        const ended = signal<End | null>(null);
         const create = this.findCreation(this.creation()).create;
-        const source$ = defer(() => create(this.clock, this.presses)).pipe(map(toMail), post);
+        const source$ = defer(() => {
+            runs.update((n) => n + 1);
+            ended.set(null);
+            return create(this.clock, this.presses);
+        }).pipe(
+            tap({ error: () => ended.set('error'), complete: () => ended.set('complete') }),
+            finalize(() => runs.update((n) => n - 1)),
+            map(toMail),
+            post,
+        );
         const courierOption = this.courierOption();
         // Hot: one shared mailbox run, houses only get mail posted after they subscribe.
         // Cold: every subscription (house) triggers its own run from the start.
@@ -305,8 +318,12 @@ export class PostalService {
         });
         /** The road leading to the houses. */
         const lastRoad = centers.length;
-        return { mail$, mailbox, transit, depots, lastRoad, split, activity: activity.asReadonly() };
+        const closed = computed(() => runs() === 0 ? ended() : null);
+        return { mail$, mailbox, transit, depots, lastRoad, split, closed, activity: activity.asReadonly() };
     });
+
+    /** How the mailbox ended (error or complete) once no run of it is live any more, else null. */
+    readonly mailboxClosed = computed(() => this.pipeline().closed());
 
     readonly activity = computed(() => this.pipeline().activity());
     readonly travellers = computed(() => this.pipeline().transit.travellers());
@@ -405,7 +422,7 @@ export class PostalService {
 
     /** Posts a mail (send), fails (error) or closes (complete) the mailbox, when it is manual. */
     press(kind: Press): void {
-        if (!this.manual()) {
+        if (!this.manual() || this.mailboxClosed()) {
             return;
         }
         this.presses.next(kind);

@@ -94,6 +94,7 @@
                                 mat-flat-button
                                 class="press__send"
                                 [class.press--active]="pressed() === 'send'"
+                                [disabled]="mailboxClosed()"
                                 (click)="press('send')"
                                 matTooltip="post.next(mail)"
                             >
@@ -104,6 +105,7 @@
                                 mat-stroked-button
                                 class="press__error"
                                 [class.press--active]="pressed() === 'error'"
+                                [disabled]="mailboxClosed()"
                                 (click)="press('error')"
                                 matTooltip="post.error('lost mail')"
                             >
@@ -114,6 +116,7 @@
                                 mat-stroked-button
                                 class="press__complete"
                                 [class.press--active]="pressed() === 'complete'"
+                                [disabled]="mailboxClosed()"
                                 (click)="press('complete')"
                                 matTooltip="post.complete()"
                             >
@@ -122,6 +125,17 @@
                                 >
                                 Complete <kbd>C</kbd>
                             </button>
+                            @if (mailboxClosed(); as end) {
+                                <!-- the observable contract: nothing can be sent after error or complete -->
+                                <p class="press__closed" role="status">
+                                    {{ end === 'error' ? 'The mailbox failed' : 'The mailbox is closed' }}:
+                                    an observable sends nothing after {{ end }}.
+                                    <button mat-button (click)="restart()">
+                                        <mat-icon fontSet="material-symbols-outlined">restart_alt</mat-icon>
+                                        Restart
+                                    </button>
+                                </p>
+                            }
                         </div>
                     }
                     <mat-slide-toggle [checked]="hot()" (change)="hot.set($event.checked)">
