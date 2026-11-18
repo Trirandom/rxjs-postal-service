@@ -173,7 +173,7 @@ export class PostalService {
     // --- pipeline configuration -------------------------------------------------
     readonly creation = signal(CREATION_OPTIONS[0].name);
     /** Hot mailbox (shared, late subscribers miss past mail) or cold (one run per house). */
-    readonly hot = signal(true);
+    readonly hot = signal(false);
     readonly centers = signal<SortingCenter[]>([this.newCenter('map')]);
     readonly houses = signal<House[]>([]);
     /** Bumped by "Restart" to rebuild the pipeline (and resubscribe every house). */

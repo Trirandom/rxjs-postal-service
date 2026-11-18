@@ -30,7 +30,7 @@ export const CREATION_GUIDES: Record<string, OperatorGuide> = {
         docs: [api('interval')],
         scenario: [
             'Pick interval in the mailbox: a letter is posted every second (#1, #2, #3…).',
-            'Toggle Hot off (cold), then switch a house off and on: it restarts at #1, it got a brand new run.',
+            'Keep the mailbox cold (Hot off), then switch a house off and on: it restarts at #1, it got a brand new run.',
             'Add a take sorting center to see the never-ending stream complete.',
         ],
     },
@@ -88,7 +88,7 @@ export const CREATION_GUIDES: Record<string, OperatorGuide> = {
         ],
         docs: [api('defer')],
         scenario: [
-            'Pick defer in the mailbox and toggle Hot off (cold).',
+            'Pick defer in the mailbox and keep it cold (Hot off).',
             'Build a few houses and press Restart: each house may receive a different letter, the factory ran once per house.',
         ],
     },
@@ -388,7 +388,7 @@ export const OPERATOR_GUIDES: Record<string, OperatorGuide> = {
         about: ['Shares one subscription to the source between every subscriber, turning a cold stream hot.'],
         docs: [api('share')],
         scenario: [
-            'Toggle Hot off (cold) in the mailbox and build a second house: without share, each house has its own lane and its own mailbox run.',
+            'Keep the mailbox cold (Hot off) and build a second house: without share, each house has its own lane and its own mailbox run.',
             'Pick share: the road before the center now carries a single shared stream, the mailbox runs once for everyone.',
             'Switch a house off and on: it joins the shared run and misses the letters posted meanwhile.',
         ],
