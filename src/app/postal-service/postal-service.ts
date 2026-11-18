@@ -96,6 +96,8 @@ interface LaneLine {
     offset: number;
     off: boolean;
     shared: boolean;
+    /** Its stream has ended (error or complete): nothing will travel on it any more. */
+    closed: boolean;
 }
 
 /** Layout of the last road: half the previous stage width, road width, house centers (px from the line). */
@@ -252,6 +254,8 @@ export class PostalService {
         const leave = (stage: string | null, road: number, fromRoad?: number, depot?: CourierDepot) =>
             laneTap((captured) => {
                 const lane = laneOn(road, captured);
+                // A new subscription on this lane: its stream is open (again).
+                transit.reopen(road, lane);
                 const reached = () =>
                     fromRoad === undefined
                         ? transit.posted()
@@ -447,9 +451,19 @@ export class PostalService {
             return [];
         }
         if (road < this.pipeline().split) {
-            return [{ key: 'shared', offset: 0, off: false, shared: true }];
+            return [{ key: 'shared', offset: 0, off: false, shared: true, closed: this.laneClosed(road, null) }];
         }
-        return this.houses().map((house) => ({ key: house.id, offset: this.laneOffset(house.id), off: !house.subscribed(), shared: false }));
+        return this.houses().map((house) => ({
+            key: house.id,
+            offset: this.laneOffset(house.id),
+            off: !house.subscribed(),
+            shared: false,
+            closed: this.laneClosed(road, house.id),
+        }));
+    }
+
+    private laneClosed(road: number, lane: Lane): boolean {
+        return this.pipeline().transit.isClosed(road, lane);
     }
 
     laneOffset(lane: Lane): number {

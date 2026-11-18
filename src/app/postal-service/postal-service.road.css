@@ -17,11 +17,12 @@
     left: 0;
     right: 0;
     top: calc(50% + var(--lane, 0px));
-    border-top: 3px dashed var(--lane-color);
+    border-top: 3px solid var(--lane-color);
     translate: 0 -50%;
     transition:
         top 300ms ease,
-        opacity 200ms;
+        opacity 200ms,
+        border-color 300ms;
 }
 
 .lane--shared {
@@ -30,6 +31,12 @@
 
 .lane--off {
     opacity: 0.25;
+}
+
+/* an ended stream (error or complete): a greyed dotted line, nothing travels on it any more */
+.lane--closed {
+    border-top-style: dotted;
+    border-top-color: var(--lane-closed-color);
 }
 
 /* the last road: lanes stop where they turn towards their house */
@@ -51,8 +58,15 @@
     fill: none;
     stroke: var(--lane-color);
     stroke-width: 3;
-    stroke-dasharray: 8 6;
-    transition: opacity 200ms;
+    transition:
+        opacity 200ms,
+        stroke 300ms;
+}
+
+.split__lane.lane--closed {
+    stroke: var(--lane-closed-color);
+    stroke-dasharray: 0.1 6;
+    stroke-linecap: round;
 }
 
 /* terminal marker travelling behind the last mail: a torn letter for error, ✓ for complete */

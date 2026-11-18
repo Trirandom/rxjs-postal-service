@@ -472,6 +472,7 @@
                 class="lane"
                 [class.lane--off]="lane.off"
                 [class.lane--shared]="lane.shared"
+                [class.lane--closed]="lane.closed"
                 [style.--lane]="lane.offset + 'px'"
             ></span>
         }
@@ -482,6 +483,7 @@
                     <path
                         class="split__lane"
                         [class.lane--off]="lane.off"
+                        [class.lane--closed]="lane.closed"
                         [attr.d]="splitPath(lane)"
                     />
                 }
@@ -540,6 +542,7 @@
                 class="lane lane--in"
                 [class.lane--off]="lane.off"
                 [class.lane--shared]="lane.shared"
+                [class.lane--closed]="lane.closed"
                 [style.--lane]="lane.offset + 'px'"
             ></span>
         }
@@ -548,6 +551,7 @@
                 class="lane lane--out"
                 [class.lane--off]="lane.off"
                 [class.lane--shared]="lane.shared"
+                [class.lane--closed]="lane.closed"
                 [style.--lane]="lane.offset + 'px'"
             ></span>
         }

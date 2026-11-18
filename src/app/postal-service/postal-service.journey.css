@@ -2,6 +2,7 @@
 .journey {
     --stage-width: 15rem;
     --lane-color: color-mix(in srgb, var(--mat-sys-primary) 55%, transparent);
+    --lane-closed-color: var(--mat-sys-outline);
     /* offsets of the houses are measured from here */
     --road-width: 5rem;
     --houses-width: 22rem;
