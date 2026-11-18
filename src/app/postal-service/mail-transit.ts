@@ -14,13 +14,19 @@ export const DEPARTURE_GAP_MS = 300;
  */
 export type Lane = number | null;
 
-/** A mail currently travelling on a lane of a road. */
+/** How a stream ends: the last notification it can ever send. */
+export type End = 'complete' | 'error';
+
+/** A mail (or the terminal marker of a stream) currently travelling on a lane of a road. */
 export interface Traveller {
     id: number;
     /** Road index: 0 leaves the mailbox, i + 1 leaves sorting center i. */
     road: number;
     lane: Lane;
-    item: MailItem;
+    /** The mail carried; null for a terminal marker. */
+    item: MailItem | null;
+    /** Set on a terminal marker: the error (✕) or complete (|) notification ending the lane. */
+    end?: End;
     /** Real-time duration of the trip, in ms (the clock speed at departure applied). */
     duration: number;
 }
@@ -38,6 +44,10 @@ export class MailTransit {
     readonly travellers = signal<Traveller[]>([]);
     /** Clock time of the latest departure, per road and lane. */
     private readonly departures = new Map<string, number>();
+    /** Lanes whose stream has ended (its terminal marker arrived), by road and lane key. */
+    private readonly closed = signal<ReadonlySet<string>>(new Set());
+    /** Clock time at which each lane is closed by its terminal marker. */
+    private readonly closingAt = new Map<string, number>();
     /** Clock time at which the mailbox showed its latest post. */
     private lastPost = -Infinity;
     private nextId = 1;
@@ -73,14 +83,52 @@ export class MailTransit {
 
     /** Sends a mail on a lane, no earlier than `notBefore` and spaced from the previous one. */
     depart(road: number, lane: Lane, item: MailItem, notBefore: number, onDepart?: () => void): void {
+        this.send(road, lane, item, undefined, notBefore, onDepart);
+    }
+
+    /**
+     * Sends the terminal marker of a lane (its error or complete notification) behind the mail
+     * already on its way. Nothing can follow it: the lane is closed once the marker has arrived.
+     */
+    end(road: number, lane: Lane, end: End, notBefore: number, onDepart?: () => void): void {
+        const k = key(road, lane);
+        const closeAt = this.send(road, lane, null, end, notBefore, onDepart) + TRANSIT_MS;
+        this.closingAt.set(k, closeAt);
+        this.at(closeAt, () => this.closed.update((set) => new Set(set).add(k)));
+    }
+
+    /** A new subscription runs on a lane (resubscribe, retry, repeat): it opens again once a pending marker has arrived. */
+    reopen(road: number, lane: Lane): void {
+        const k = key(road, lane);
+        // Actions due at the same time run in scheduling order: this comes after the pending close.
+        this.at(this.closingAt.get(k) ?? -Infinity, () =>
+            this.closed.update((set) => {
+                if (!set.has(k)) {
+                    return set;
+                }
+                const next = new Set(set);
+                next.delete(k);
+                return next;
+            }),
+        );
+    }
+
+    /** Whether the stream on a lane has ended (error or complete). */
+    isClosed(road: number, lane: Lane): boolean {
+        return this.closed().has(key(road, lane));
+    }
+
+    /** Schedules a traveller on a lane, spaced from the previous one. Returns its departure time. */
+    private send(road: number, lane: Lane, item: MailItem | null, end: End | undefined, notBefore: number, onDepart?: () => void): number {
         const at = Math.max(this.clock.now(), notBefore, this.lastDeparture(road, lane) + DEPARTURE_GAP_MS);
         this.departures.set(key(road, lane), at);
         this.at(at, () => {
             onDepart?.();
-            const traveller: Traveller = { id: this.nextId++, road, lane, item, duration: TRANSIT_MS / this.clock.speed };
+            const traveller: Traveller = { id: this.nextId++, road, lane, item, end, duration: TRANSIT_MS / this.clock.speed };
             this.travellers.update((list) => [...list, traveller]);
             this.at(this.clock.now() + TRANSIT_MS, () => this.travellers.update((list) => list.filter((t) => t !== traveller)));
         });
+        return at;
     }
 
     /** Clock time of the latest departure on a lane (-Infinity if none). */
