@@ -65,7 +65,18 @@
                             >{{ stage('mailbox')?.count ?? 0 }} posted</span
                         >
                     </header>
-                    <img class="stage__img" src="mailman/mailbox.svg" alt="Mailbox" />
+                    <ng-container
+                        *ngTemplateOutlet="
+                            figure;
+                            context: {
+                                code: creationCode(),
+                                src: 'mailman/mailbox.svg',
+                                alt: 'Mailbox',
+                                card: 'mailbox',
+                                name: creation(),
+                            }
+                        "
+                    />
                     <mat-form-field subscriptSizing="dynamic">
                         <mat-label>Creation operator</mat-label>
                         <mat-select
@@ -79,7 +90,6 @@
                             }
                         </mat-select>
                     </mat-form-field>
-                    <code class="stage__code">{{ creationCode() }}</code>
                 </div>
                 <ng-container
                     *ngTemplateOutlet="
@@ -160,13 +170,20 @@
                             >help</mat-icon
                         >
                     </header>
-                    <div class="flex items-center gap-3">
-                        <img
-                            class="courier-box__img"
-                            src="mailman/courier-dispatch.svg"
-                            alt="Courier dispatch"
-                        />
-                        <mat-form-field subscriptSizing="dynamic" class="min-w-0 flex-1">
+                    <ng-container
+                        *ngTemplateOutlet="
+                            figure;
+                            context: {
+                                code: 'courier = (mail) => ' + courierOption().code,
+                                src: 'mailman/courier-dispatch.svg',
+                                alt: 'Courier dispatch',
+                                imgClass: 'courier-box__img',
+                                card: 'courier',
+                                name: courierCreation(),
+                            }
+                        "
+                    />
+                    <mat-form-field subscriptSizing="dynamic">
                             <mat-label>Courier creation</mat-label>
                             <mat-select
                                 [value]="courierCreation()"
@@ -177,10 +194,6 @@
                                 }
                             </mat-select>
                         </mat-form-field>
-                    </div>
-                    <code class="stage__code"
-                        >courier = (mail) =&gt; {{ courierOption().code }}</code
-                    >
                     @for (entry of flatteningCenters(); track entry.center.id) {
                         @if (depot(entry.center.id); as depot) {
                             <section
@@ -264,10 +277,18 @@
                             <mat-icon fontSet="material-symbols-outlined">close</mat-icon>
                         </button>
                     </header>
-                    <img
-                        class="stage__img stage__img--sorter"
-                        src="mailman/sorting-belt.svg"
-                        alt="Sorting conveyor"
+                    <ng-container
+                        *ngTemplateOutlet="
+                            figure;
+                            context: {
+                                code: operatorCode(center.operator),
+                                src: 'mailman/sorting-belt.svg',
+                                alt: 'Sorting conveyor',
+                                imgClass: 'stage__img--sorter',
+                                card: 'center',
+                                name: center.operator,
+                            }
+                        "
                     />
                     <mat-form-field subscriptSizing="dynamic">
                         <mat-label>Operator</mat-label>
@@ -284,7 +305,6 @@
                             }
                         </mat-select>
                     </mat-form-field>
-                    <code class="stage__code">{{ operatorCode(center.operator) }}</code>
                 </div>
                 <ng-container
                     *ngTemplateOutlet="
@@ -582,6 +602,40 @@
                 <span class="dock__empty">waiting for mail…</span>
             }
         }
+    </div>
+</ng-template>
+
+<!-- a card's main icon: its code example in a tooltip on the left, its "?" guide dialog on the right -->
+<ng-template
+    #figure
+    let-code="code"
+    let-src="src"
+    let-alt="alt"
+    let-imgClass="imgClass"
+    let-card="card"
+    let-name="name"
+>
+    <div class="figure">
+        <button
+            mat-icon-button
+            class="figure__action"
+            [matTooltip]="code"
+            matTooltipClass="code-tooltip"
+            matTooltipPosition="above"
+            aria-label="Show the code example"
+        >
+            <mat-icon fontSet="material-symbols-outlined">code</mat-icon>
+        </button>
+        <img class="stage__img" [class]="imgClass" [src]="src" [alt]="alt" />
+        <button
+            mat-icon-button
+            class="figure__action"
+            (click)="openGuide(card, name)"
+            [matTooltip]="'About ' + name"
+            [attr.aria-label]="'About ' + name"
+        >
+            <mat-icon fontSet="material-symbols-outlined">help</mat-icon>
+        </button>
     </div>
 </ng-template>
 

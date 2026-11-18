@@ -16,6 +16,7 @@ import {
     WritableSignal,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
@@ -37,6 +38,8 @@ import {
 import { MailClock } from './mail-clock';
 import { CourierDepot, CourierRun } from './mail-depot';
 import { End, inLane, Lane, laneTap, MailTransit, Traveller } from './mail-transit';
+import { COURIER_GUIDES, CREATION_GUIDES, OPERATOR_GUIDES, OperatorGuide } from './operator-guide';
+import { OperatorGuideData, OperatorGuideDialog } from './operator-guide-dialog';
 
 /** A sorting center sits between the mailbox and the houses and applies one operator. */
 interface SortingCenter {
@@ -74,6 +77,12 @@ class House {
         readonly img: string,
     ) { }
 }
+
+/** The cards that have a "?" guide dialog. */
+type GuideCard = 'mailbox' | 'courier' | 'center';
+
+const guideData = (name: string, kind: string, code: string, guide: OperatorGuide | undefined): OperatorGuideData | null =>
+    guide ? { name, kind, code, guide } : null;
 
 const MAILBOX = 'mailbox';
 const MAX_RECEIVED = 6;
@@ -150,6 +159,7 @@ const inputKey = (id: number | string) => `${id}:in`;
 export class PostalService {
     private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
     private readonly injector = inject(Injector);
+    private readonly dialog = inject(MatDialog);
     private nextCenterId = 1;
     private nextHouseId = 1;
     private nextMailSeq = 1;
@@ -508,6 +518,19 @@ export class PostalService {
             at: (layout.from + layout.width - SPLIT_PX) / distance,
             len: SPLIT_PX / distance,
         };
+    }
+
+    /** Opens the "?" dialog of a card: about the operator, its docs, and a scenario to try here. */
+    openGuide(card: GuideCard, name: string): void {
+        const data: OperatorGuideData | null =
+            card === 'mailbox'
+                ? guideData(this.findCreation(name).label ?? name, 'Creation operator', this.findCreation(name).code, CREATION_GUIDES[name])
+                : card === 'courier'
+                  ? guideData(name, 'Courier (inner observable)', `courier = (mail) => ${this.courierOption().code}`, COURIER_GUIDES[name])
+                  : guideData(name, `${this.operatorCategory(name)} operator`, this.operatorCode(name), OPERATOR_GUIDES[name]);
+        if (data) {
+            this.dialog.open(OperatorGuideDialog, { data, width: '36rem', maxWidth: 'calc(100vw - 2rem)' });
+        }
     }
 
     operatorCode(name: string): string {

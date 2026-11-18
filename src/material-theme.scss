@@ -94,3 +94,18 @@ code,
 pre {
   font-family: var(--app-font-mono);
 }
+
+// Code example tooltips of the cards: monospace, wide enough for a line of RxJS.
+.code-tooltip {
+  --mat-tooltip-supporting-text-font: var(--app-font-mono);
+  --mat-tooltip-supporting-text-size: 0.75rem;
+  --mat-tooltip-supporting-text-line-height: 1.4;
+
+  .mdc-tooltip__surface {
+    max-width: min(26rem, calc(100vw - 2rem));
+    padding: 0.5rem 0.625rem;
+    text-align: left;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}

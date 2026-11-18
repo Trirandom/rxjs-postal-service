@@ -85,13 +85,24 @@
     height: 6.5rem;
 }
 
-.stage__code {
-    font-family: var(--app-font-mono);
-    font-size: 0.75rem;
-    padding: 0.5rem 0.625rem;
-    border-radius: var(--mat-sys-corner-medium);
-    background: light-dark(rgb(255 255 255 / 0.6), rgb(0 0 0 / 0.25));
-    border: 1px solid var(--app-glass-border);
-    color: var(--mat-sys-on-surface);
-    word-break: break-word;
+/* a card's main icon, between its code tooltip (left) and its "?" guide dialog (right) */
+.figure {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.figure .stage__img {
+    min-width: 0;
+    flex: 0 1 auto;
+}
+
+.figure__action {
+    flex: none;
+    color: var(--mat-sys-on-surface-variant);
+}
+
+.figure__action:hover {
+    color: var(--mat-sys-primary);
 }
