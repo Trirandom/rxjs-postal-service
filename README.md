@@ -2,6 +2,8 @@
 
 An interactive playground for learning RxJS. You build an observable pipeline as a postal network, then watch every letter travel from the mailbox, through the sorting centers, to the houses that subscribe to it.
 
+Live at https://rxjs-postal-service.com
+
 ![RxJS Postal Service screenshot](docs/screenshot.jpg)
 
 ## The metaphor
